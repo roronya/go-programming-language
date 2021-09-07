@@ -1,8 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 func main() {
-	i := 260
-	fmt.Println(uint8(i))
+	a := make(map[string]string)
+	x := a["a"]
+	fmt.Println(strconv.Atoi(x))
 }
