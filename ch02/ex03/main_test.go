@@ -1,4 +1,4 @@
-package popcount2
+package popcount
 
 import (
 	"testing"
@@ -8,12 +8,12 @@ import (
 
 func BenchmarkPopCount(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		popcount.PopCount(1000000)
+		popcount.PopCount(0xffffffffffffffff)
 	}
 }
 
 func BenchmarkPopCount2(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		PopCount(1000000)
+		PopCount2(0xffffffffffffffff)
 	}
 }

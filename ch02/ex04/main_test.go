@@ -1,9 +1,11 @@
-package ex04
+package popcount
 
-import "testing"
+import (
+	"testing"
+)
 
 func BenchmarkPopCount3(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		PopCount3(1000000)
+		PopCount3(0xffffffffffffffff)
 	}
 }

@@ -1,4 +1,4 @@
-package popcount2
+package popcount
 
 var pc [256]byte
 
@@ -8,7 +8,7 @@ func init() {
 	}
 }
 
-func PopCount(x uint64) int {
+func PopCount2(x uint64) int {
 	y := 0
 	for i := 0; i < 8; i++ {
 		y += int(pc[byte(x>>(i*8))])

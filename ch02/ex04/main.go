@@ -1,4 +1,4 @@
-package ex04
+package popcount
 
 func PopCount3(x uint64) int {
 	y := 0
