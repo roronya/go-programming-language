@@ -7,7 +7,7 @@ import (
 )
 
 func TestF(t *testing.T) {
-	slice := bytes.NewBufferString("\t").Bytes()
+	slice := bytes.NewBufferString("\t\t").Bytes()
 	actual := f(slice)
 	expected := bytes.NewBufferString(" ").Bytes()
 	for i, _ := range actual {
