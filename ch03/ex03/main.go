@@ -29,6 +29,7 @@ func main() {
 			if math.IsInf(ax, 0) || math.IsInf(ay, 0) || math.IsInf(bx, 0) || math.IsInf(by, 0) || math.IsInf(cx, 0) || math.IsInf(cy, 0) || math.IsInf(dx, 0) || math.IsInf(dy, 0) {
 				continue
 			}
+			// zの値に基づいて0~256の値に変換できると良さそうだけどzのスケールをどう計算するか？
 			fmt.Printf("<polygon points='%g,%g,%g,%g,%g,%g,%g,%g' fill='%g'/>\n", ax, ay, bx, by, cx, cy, dx, dy, z)
 		}
 	}

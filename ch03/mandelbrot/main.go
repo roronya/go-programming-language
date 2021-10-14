@@ -4,6 +4,7 @@ import (
 	"image"
 	"image/color"
 	"image/png"
+	"log"
 	"math/cmplx"
 	"os"
 )
@@ -34,6 +35,9 @@ func mandelbrot(z complex128) color.Color {
 	for n := uint8(0); n < iterations; n++ {
 		v = v*v + z
 		if cmplx.Abs(v) > 2 {
+			if n > 20 {
+				log.Printf("%d, %d, %t", n, 255-contrast*n, 255-contrast*n)
+			}
 			return color.Gray{255 - contrast*n}
 		}
 	}
