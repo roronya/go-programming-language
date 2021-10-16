@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 )
 
@@ -23,5 +24,6 @@ func TestComma_小数点があるとき(t *testing.T) {
 	actual := comma(*bytes.NewBufferString("1234.56789"))
 	if actual != "1,234.56789" {
 		t.Errorf("%s is not 1,234.56789", actual)
+		strings.Count()
 	}
 }
