@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -13,21 +12,9 @@ import (
 )
 
 func TestVisit(t *testing.T) {
-	f, err := os.Open("test.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	txt, err := ioutil.ReadAll(f)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	doc, err := html.Parse(bytes.NewBuffer(txt))
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "html parse failed: %v\n", err)
-		os.Exit(1)
-	}
+	f, _ := os.Open("test.html")
+	txt, _ := ioutil.ReadAll(f)
+	doc, _ := html.Parse(bytes.NewBuffer(txt))
 
 	actual := visit(doc)
 	expected := []string{"link0", "link1", "link2", "link3", "link4", "link5"}
