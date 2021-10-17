@@ -25,5 +25,4 @@ func TestVisit(t *testing.T) {
 			log.Fatalf("%s != %s\nactual: %#v\nexpected: %#v", actual[i], expected[i], actual, expected)
 		}
 	}
-
 }
