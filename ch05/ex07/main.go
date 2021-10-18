@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -42,17 +43,41 @@ func forEachNode(n *html.Node, pre, post func(n *html.Node)) {
 }
 
 var depth int
+var out io.Writer = os.Stdout
 
 func startElement(n *html.Node) {
-	if n.Type == html.ElementNode {
-		fmt.Printf("%*s<%s>\n", depth*2, "", n.Data)
+	switch n.Type {
+	case html.ElementNode:
+		printIndent(depth)
+		fmt.Fprintf(out, "<%s", n.Data)
+		for _, a := range n.Attr {
+			fmt.Fprintf(out, " %s=\"%s\"", a.Key, a.Val)
+		}
+		if c := n.FirstChild; c == nil {
+			fmt.Println("/>")
+			return
+		}
+		fmt.Println(">")
 		depth++
+	case html.TextNode:
+		printIndent(depth)
+		fmt.Fprintf(out, "%s\n", n.Data)
+	case html.CommentNode:
+		printIndent(depth)
+		fmt.Fprintf(out, "<!--%s-->\n", n.Data)
 	}
 }
 
 func endElement(n *html.Node) {
 	if n.Type == html.ElementNode {
-		depth--
-		fmt.Printf("%*s</%s>\n", depth*2, "", n.Data)
+		if c := n.FirstChild; c != nil {
+			depth--
+			printIndent(depth)
+			fmt.Fprintf(out, "</%s>\n", n.Data)
+		}
 	}
+}
+
+func printIndent(depth int) {
+	fmt.Fprintf(out, "%*s", depth*2, "")
 }
