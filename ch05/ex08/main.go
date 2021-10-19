@@ -22,6 +22,7 @@ func forEachNode(n *html.Node, pre, post func(n *html.Node) bool) *html.Node {
 }
 
 func ElementByID(doc *html.Node, id string) *html.Node {
+	// TODO: 無名関数使わないでやる方法ある？
 	pre := func(n *html.Node) bool {
 		if n.Type == html.ElementNode {
 			for _, a := range n.Attr {
