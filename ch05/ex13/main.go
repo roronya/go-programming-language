@@ -2,17 +2,16 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/roronya/go-programming-language/ch05/links"
 )
 
-// breadthFirstはworklist内の個々の項目に対してfを呼び出します
-// fから返されたすべての項目はworklistへ追加されます
-// fはそれぞれの項目に対して高々一度しか呼び出されません。
 func breadthFirst(f func(item string) []string, worklist []string) {
 	seen := make(map[string]bool)
 	for len(worklist) > 0 {
@@ -28,8 +27,6 @@ func breadthFirst(f func(item string) []string, worklist []string) {
 }
 
 func crawl(url string) []string {
-	fmt.Println(url)
-	domain := getDomain(url)
 	// FIXME: links.Extractと合わせて二度リクエストを投げてしまっている
 	err := download(url)
 
@@ -39,6 +36,7 @@ func crawl(url string) []string {
 	}
 
 	// 元のurlと違うドメインのurlがlistに入っていればそれをフィルタしておけばよい
+	domain := getDomain(url)
 	list = filterByPrefix(list, domain)
 
 	return list
@@ -54,27 +52,40 @@ func download(url string) error {
 		return fmt.Errorf("getting %s: %s", url, resp.Status)
 	}
 
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
 	resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("parsing %s as HTML: %v", url, err)
 	}
+
 	// TODO: コンテンツの保存をする
-	err = save(resp.Body, url)
+	path := "./" + resp.Request.URL.Path
+	err = save(body, path)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func save() error {
-	/**
-	err = os.Mkdir(domain) // FIXME: 既にあるディレクトリを作らないようにする
-	if err != nil {
-		log.Print(err)
+func save(bytes []byte, path string) error {
+	path = filepath.Clean(path)
+	if err := os.MkdirAll(filepath.Dir(path), 0777); err != nil {
+		return err
 	}
-	*/
 
-	// pathごとにディレクトリを切ってコンテンツを保存する
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	if _, err := f.Write(bytes); err != nil {
+		return err
+	}
+
 	return nil
 }
 

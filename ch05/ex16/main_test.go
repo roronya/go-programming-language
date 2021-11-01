@@ -24,7 +24,7 @@ var tests = []struct {
 	{faces, "", []string{"☺", "☻", "☹"}},
 	{faces, "", []string{"☺", "☻", "☹"}},
 	{"☺�☹", "", []string{"☺", "�", "☹"}},
-	{"", "a", nil},
+	{"", "a", nil}, // これだけstrings_test.goから変えてる
 	{abcd, "a", []string{"", "bcd"}},
 	{abcd, "z", []string{"abcd"}},
 	{commas, ",", []string{"1", "2", "3", "4"}},
