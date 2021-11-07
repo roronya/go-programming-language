@@ -9,6 +9,8 @@ import (
 	"golang.org/x/net/html"
 )
 
+var depth int
+
 func main() {
 	url := os.Args[1]
 	resp, err := http.Get(url)
@@ -24,7 +26,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("parsing %s as HTML: %v", url, err)
 	}
-	var depth int
+
+	outline(doc)
+}
+
+func outline(doc *html.Node) {
 	startElement := func(n *html.Node) {
 		if n.Type == html.ElementNode {
 			fmt.Printf("%*s<%s>\n", depth*2, "", n.Data)
@@ -37,13 +43,10 @@ func main() {
 			fmt.Printf("%*s</%s>\n", depth*2, "", n.Data)
 		}
 	}
+
 	forEachNode(doc, startElement, endElement)
 }
 
-// forEachNodeはnから始まるツリー内の個々のノードxに対して
-// 関数pre(x)とpost(x)を呼び出します。その二つの関数はオプションです。
-// preは子ノードを訪れる前に呼び出され（前順:preorder)、
-// postは子ノードを訪れた後に呼び出されます（後順:postorder）。
 func forEachNode(n *html.Node, pre, post func(n *html.Node)) {
 	if pre != nil {
 		pre(n)
