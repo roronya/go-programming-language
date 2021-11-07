@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -26,30 +27,39 @@ func breadthFirst(f func(item string) []string, worklist []string) {
 	}
 }
 
-func crawl(url string) []string {
-	// FIXME: links.Extractと合わせて二度リクエストを投げてしまっている
-	err := download(url)
-
-	list, err := links.Extract(url)
+func crawl(rawUrl string) []string {
+	err := download(rawUrl)
 	if err != nil {
 		log.Print(err)
 	}
 
-	// 元のurlと違うドメインのurlがlistに入っていればそれをフィルタしておけばよい
-	domain := getDomain(url)
-	list = filterByPrefix(list, domain)
+	list, err := links.Extract(rawUrl)
+	if err != nil {
+		log.Print(err)
+	}
+
+	// 元のurlと違うドメインのurlがlistに入っていればそれをフィルタして、異なるドメインを探索しないようにする
+	url_, err := url.Parse(rawUrl)
+	if err != nil {
+		log.Print(err)
+	}
+	list = selectByPrefix(list, url_.Scheme+"://"+url_.Hostname())
+
+	for _, item := range list {
+		fmt.Println(item)
+	}
 
 	return list
 }
 
-func download(url string) error {
-	resp, err := http.Get(url)
+func download(url_ string) error {
+	resp, err := http.Get(url_)
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		resp.Body.Close()
-		return fmt.Errorf("getting %s: %s", url, resp.Status)
+		return fmt.Errorf("getting %s: %s", url_, resp.Status)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -57,13 +67,8 @@ func download(url string) error {
 		return err
 	}
 
-	resp.Body.Close()
-	if err != nil {
-		return fmt.Errorf("parsing %s as HTML: %v", url, err)
-	}
-
-	// TODO: コンテンツの保存をする
-	path := "./" + resp.Request.URL.Path
+	path := urlToFilepath(resp.Request.URL)
+	log.Println(path)
 	err = save(body, path)
 	if err != nil {
 		return err
@@ -89,7 +94,7 @@ func save(bytes []byte, path string) error {
 	return nil
 }
 
-func filterByPrefix(list []string, prefix string) []string {
+func selectByPrefix(list []string, prefix string) []string {
 	result := []string{}
 	for _, l := range list {
 		if !strings.HasPrefix(l, prefix) {
@@ -100,8 +105,20 @@ func filterByPrefix(list []string, prefix string) []string {
 	return result
 }
 
-func getDomain(url string) string {
-	return "gopl.io"
+func urlToFilepath(u *url.URL) string {
+	builder := strings.Builder{}
+	builder.WriteString(u.Hostname())
+	builder.WriteString(u.Path)
+	// 末尾が省略されてるケースはindex.htmlとして処理する
+	// pathが指定されないケースケース 例: https://www.debian.or.jp
+	if u.Path == "" {
+		builder.WriteString("/index.html")
+	}
+	// 末尾が/で終わるケース 例: https://www.debian.or.jp/doc/
+	if strings.HasSuffix(u.Path, "/") {
+		builder.WriteString("index.html")
+	}
+	return builder.String()
 }
 
 func main() {
