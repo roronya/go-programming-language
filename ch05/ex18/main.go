@@ -22,8 +22,7 @@ func fetch(url string) (filename string, n int64, err error) {
 	if err != nil {
 		return "", 0, err
 	}
-	// deferに代入文は渡せないので以下の関数を渡す
-	// f.Close()しつつもio.Copy()でエラーがあったら優先する
+	// f.Close()しつつもio.Copy()でエラーがあったら優先するような無名関数を作ってdeferにわたす
 	fileClose := func() {
 		if closeErr := f.Close(); err == nil {
 			err = closeErr
