@@ -13,22 +13,30 @@ func TestTree_String(t *testing.T) {
 		{
 			tree{
 				0,
-				&tree{1, nil, nil},
-				&tree{2, nil, nil},
+				&tree{1, &tree{2, nil, nil}, &tree{3, nil, nil}},
+				&tree{4, &tree{5, nil, nil}, &tree{6, nil, nil}},
 			},
-			"[0, [1], [2]]",
+			"[0 [1 [2 [] []] [3 [] []]] [4 [5 [] []] [6 [] []]]]",
+		},
+		{
+			tree{},
+			"[0 [] []]",
+		},
+		{
+			tree{0, &tree{1, nil, nil}, nil},
+			"[0 [1 [] []] []]",
+		},
+		{
+			tree{0, nil, &tree{1, nil, nil}},
+			"[0 [] [1 [] []]]",
 		},
 		{
 			tree{
 				0,
-				&tree{1, &tree{2, nil, nil}, &tree{3, nil, nil}},
-				&tree{4, &tree{5, nil, nil}, &tree{6, nil, nil}},
+				&tree{1, nil, nil},
+				&tree{2, nil, nil},
 			},
-			"[0, [1, [2], [3]], [4, [5], [6]]]",
-		},
-		{
-			tree{},
-			"[0]",
+			"[0 [1 [] []] [2 [] []]]",
 		},
 	}
 

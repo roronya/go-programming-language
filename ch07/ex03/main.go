@@ -15,13 +15,18 @@ func (t *tree) String() string {
 	builder.WriteString("[")
 	builder.WriteString(strconv.Itoa(t.value))
 
+	builder.WriteString(" ")
 	if t.left != nil {
-		builder.WriteString(", ")
 		builder.WriteString(t.left.String())
+	} else {
+		builder.WriteString("[]")
 	}
+
+	builder.WriteString(" ")
 	if t.right != nil {
-		builder.WriteString(", ")
 		builder.WriteString(t.right.String())
+	} else {
+		builder.WriteString("[]")
 	}
 	builder.WriteString("]")
 	return builder.String()
