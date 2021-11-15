@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/roronya/go-programming-language/ch07/ex06/tempconv"
+	"github.com/roronya/go-programming-language/ch07/tempconv"
 )
 
 var temp = tempconv.CelsiusFlag("temp", 20.0, "the temperature")
