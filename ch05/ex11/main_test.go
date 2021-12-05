@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestTopoSort_acyclic(t *testing.T) {
+func TestTopoSort_cyclic(t *testing.T) {
 	asyclic := map[string]map[string]bool{
 		"a": {"b": true},
 		"b": {"c": true},
@@ -16,7 +16,8 @@ func TestTopoSort_acyclic(t *testing.T) {
 		log.Fatalf("must be detected asyclic.\ngot = %#v\n", actual)
 	}
 }
-func TestTopoSort_nonacyclic(t *testing.T) {
+
+func TestTopoSort_noncyclic(t *testing.T) {
 	nonasyclic := map[string]map[string]bool{
 		"a": {"b": true},
 		"b": {"c": true},
