@@ -25,9 +25,7 @@ func encode(buf *bytes.Buffer, v reflect.Value, indent int) error {
 		for i := 0; i < v.Len(); i++ {
 			if i > 0 {
 				buf.WriteByte('\n')
-				for i := 0; i < indent; i++ {
-					buf.WriteByte(' ')
-				}
+				buf.Write(bytes.Repeat([]byte{' '}, indent))
 			}
 			if err := encode(buf, v.Index(i), indent); err != nil {
 				return err
@@ -43,9 +41,7 @@ func encode(buf *bytes.Buffer, v reflect.Value, indent int) error {
 		for i := 0; i < v.NumField(); i++ {
 			if i > 0 {
 				buf.WriteByte('\n')
-				for i := 0; i < indent; i++ {
-					buf.WriteByte(' ')
-				}
+				buf.Write(bytes.Repeat([]byte{' '}, indent))
 			}
 
 			fieldName := v.Type().Field(i).Name
@@ -67,9 +63,7 @@ func encode(buf *bytes.Buffer, v reflect.Value, indent int) error {
 		for i, key := range v.MapKeys() {
 			if i > 0 {
 				buf.WriteByte('\n')
-				for i := 0; i < indent; i++ {
-					buf.WriteByte(' ')
-				}
+				buf.Write(bytes.Repeat([]byte{' '}, indent))
 			}
 			buf.WriteByte('(')
 			if err := encode(buf, key, indent); err != nil {

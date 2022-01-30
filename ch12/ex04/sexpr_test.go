@@ -40,7 +40,6 @@ func ExampleMarshal() {
 		log.Fatal(err)
 	}
 	fmt.Printf("%s", b)
-	// あっているはずだが落ちちゃう
 	//Output:
 	//((Title "Dr. Strangelove")
 	// (Subtitle "How I Learned to Stop Worrying and Love the Bomb")
