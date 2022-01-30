@@ -16,3 +16,20 @@ func TestBool(t *testing.T) {
 		log.Fatalf("want \"nil\", got \"%s\"", actual)
 	}
 }
+
+func TestFloat64(t *testing.T) {
+	tests := []struct {
+		in   float64
+		want string
+	}{
+		{1.000, "1"},
+		{6.02214129e23, "6.02214129e+23"},
+		{6.62606957e-34, "6.62606957e-34"},
+	}
+	for _, t := range tests {
+		actual, _ := Marshal(t.in)
+		if string(actual) != t.want {
+			log.Fatalf("want \"%s\", got \"%s\"", t.want, actual)
+		}
+	}
+}
