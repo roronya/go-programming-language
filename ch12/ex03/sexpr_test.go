@@ -33,3 +33,19 @@ func TestFloat64(t *testing.T) {
 		}
 	}
 }
+
+func TestComplex(t *testing.T) {
+	tests := []struct {
+		in   complex128
+		want string
+	}{
+		{complex(1, 2), "#(1 2)"},
+		{complex(1.1, 2.1), "#(1.1 2.1)"},
+	}
+	for _, t := range tests {
+		actual, _ := Marshal(t.in)
+		if string(actual) != t.want {
+			log.Fatalf("want \"%s\", got \"%s\"", t.want, actual)
+		}
+	}
+}
