@@ -26,10 +26,10 @@ func TestFloat64(t *testing.T) {
 		{6.02214129e23, "6.02214129e+23"},
 		{6.62606957e-34, "6.62606957e-34"},
 	}
-	for _, t := range tests {
-		actual, _ := Marshal(t.in)
-		if string(actual) != t.want {
-			log.Fatalf("want \"%s\", got \"%s\"", t.want, actual)
+	for _, test := range tests {
+		actual, _ := Marshal(test.in)
+		if string(actual) != test.want {
+			log.Fatalf("want \"%s\", got \"%s\"", test.want, actual)
 		}
 	}
 }
@@ -45,10 +45,33 @@ func TestComplex(t *testing.T) {
 		{complex(1, 0), "#(1 0)"},
 		{complex(0, 1), "#(0 1)"},
 	}
-	for _, t := range tests {
-		actual, _ := Marshal(t.in)
-		if string(actual) != t.want {
-			log.Fatalf("want \"%s\", got \"%s\"", t.want, actual)
+	for _, test := range tests {
+		actual, _ := Marshal(test.in)
+		if string(actual) != test.want {
+			log.Fatalf("want \"%s\", got \"%s\"", test.want, actual)
+		}
+	}
+}
+
+func TestInterface(t *testing.T) {
+	var x interface{} = 1
+	var y interface{} = []int{1, 2, 3}
+	var z interface{} = struct {
+		a int
+		b byte
+	}{1, 'a'}
+	tests := []struct {
+		in   interface{}
+		want string
+	}{
+		{&x, "(int 1)"},
+		{&y, "([]int [1 2 3])"},
+		{&z, "(struct { a int; b uint8 } {1 97})"},
+	}
+	for _, test := range tests {
+		actual, _ := Marshal(test.in)
+		if string(actual) != test.want {
+			t.Errorf("want \"%s\", got \"%s\"", test.want, actual)
 		}
 	}
 }
