@@ -41,6 +41,9 @@ func TestComplex(t *testing.T) {
 	}{
 		{complex(1, 2), "#(1 2)"},
 		{complex(1.1, 2.1), "#(1.1 2.1)"},
+		{complex(0, 0), "#(0 0)"},
+		{complex(1, 0), "#(1 0)"},
+		{complex(0, 1), "#(0 1)"},
 	}
 	for _, t := range tests {
 		actual, _ := Marshal(t.in)
