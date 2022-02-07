@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"reflect"
+	"text/scanner"
 )
 
 func encode(buf *bytes.Buffer, v reflect.Value) error {
@@ -71,4 +72,20 @@ func Marshal(v interface{}) ([]byte, error) {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+// Unmarshal parses sexp data and is a non-nil pointer.
+// It transfers to a variable that has an address in out.
+func Unmarshal(data []byte, out interface{}) (err error) {
+	lex := &lexer{scan: scanner.Scanner{Mode: scanner.GoTokens}}
+	lex.scan.Init(bytes.NewReader(data))
+	lex.next() // 最初のトークンを取得する
+	defer func() {
+		// note: This is not an ideal error handling example.
+		if x := recover(); x != nil {
+			err = fmt.Errorf("error at %s: %v", lex.scan.Position, x)
+		}
+	}()
+	read(lex, reflect.ValueOf(out).Elem())
+	return nil
 }
