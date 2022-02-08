@@ -98,17 +98,9 @@ func main() {
 	fmt.Println(c.CanAddr()) // false
 	fmt.Println(d.CanAddr()) // true
 	fmt.Println(e.CanAddr()) // false
-
-	fmt.Printf("%p\n", &a)
-	fmt.Printf("%p\n", &b)
-	fmt.Printf("%p\n", &c)
-	fmt.Printf("%p\n", &d)
-	fmt.Printf("%p\n", &e)
-
-	fmt.Printf("%p\n", &2)
-	fmt.Printf("%p\n", &reflect.ValueOf(2))
-	fmt.Printf("%p\n", &reflect.ValueOf(x))
-	fmt.Printf("%p\n", &reflect.ValueOf(&x))
-	fmt.Printf("%p\n", &reflect.ValueOf(&x).Elem())
-	fmt.Printf("%p\n", &c.Elem())
+	printReflectValue("a", a)
+	printReflectValue("b", b)
+	printReflectValue("c", c)
+	printReflectValue("d", d)
+	printReflectValue("e", e)
 }
