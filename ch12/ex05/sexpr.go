@@ -6,111 +6,69 @@ import (
 	"reflect"
 )
 
-func encode(buf *bytes.Buffer, v reflect.Value, indent int) error {
+/**
+ref RFC 8259 https://www.rfc-editor.org/rfc/pdfrfc/rfc8259.txt.pdf
+*/
+func encode(buf *bytes.Buffer, v reflect.Value) error {
 	switch v.Kind() {
-	case reflect.Invalid:
-		buf.WriteString("nil")
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		fmt.Fprintf(buf, "%d", v.Int())
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
 		fmt.Fprintf(buf, "%d", v.Uint())
-	case reflect.String:
-		fmt.Fprintf(buf, "%q", v.String())
-	case reflect.Ptr:
-		if v.IsNil() {
-			fmt.Fprintf(buf, "null")
-		} else {
-			return encode(buf, v.Elem(), indent)
-		}
-	case reflect.Array, reflect.Slice: // (value ...)
-		buf.WriteByte('[')
-		indent++
-
-		for i := 0; i < v.Len(); i++ {
-			if i > 0 {
-				buf.WriteByte('\n')
-				for i := 0; i < indent; i++ {
-					buf.WriteByte(' ')
-				}
-			}
-			if err := encode(buf, v.Index(i), indent); err != nil {
-				return err
-			}
-
-			if i != v.Len()-1 {
-				buf.WriteByte(',')
-			}
-		}
-
-		buf.WriteByte(']')
-		indent--
-	case reflect.Struct: // ((name value) ...)
-		buf.WriteByte('{')
-		indent++
-
-		for i := 0; i < v.NumField(); i++ {
-			if i > 0 {
-				buf.WriteByte('\n')
-				for i := 0; i < indent; i++ {
-					buf.WriteByte(' ')
-				}
-			}
-
-			fieldName := v.Type().Field(i).Name
-			fmt.Fprintf(buf, "\"%s\": ", fieldName)
-			indent += len(fieldName) + 4 // fieldNameの文字列とダウルクオーテーションとコロンとスペース分をインデントする
-
-			if err := encode(buf, v.Field(i), indent); err != nil {
-				return err
-			}
-			indent -= len(fieldName) + 4 // indentを戻す
-
-			if i != v.NumField()-1 {
-				fmt.Fprintf(buf, ",")
-			}
-		}
-
-		buf.WriteByte('}')
-		indent--
-	case reflect.Map: // (key value) ...)
-		buf.WriteByte('{')
-		indent++
-		for i, key := range v.MapKeys() {
-			if i > 0 {
-				buf.WriteByte('\n')
-				for j := 0; j < indent; j++ {
-					buf.WriteByte(' ')
-				}
-			}
-			if err := encode(buf, key, indent); err != nil {
-				return err
-			}
-			buf.WriteByte(':')
-			buf.WriteByte(' ')
-			if err := encode(buf, v.MapIndex(key), indent); err != nil {
-				return err
-			}
-
-			if i != len(v.MapKeys())-1 {
-				buf.WriteByte(',')
-			}
-		}
-		buf.WriteByte('}')
-		indent--
-	case reflect.Bool:
-		if v.Bool() {
-			fmt.Fprintf(buf, "true")
-		} else {
-			fmt.Fprintf(buf, "false")
-		}
 	case reflect.Float32, reflect.Float64:
 		fmt.Fprintf(buf, "%g", v.Float())
-	case reflect.Complex64, reflect.Complex128:
-		c := v.Complex()
-		fmt.Fprintf(buf, "#(%g %g)", real(c), imag(c))
-	case reflect.Interface:
-		fmt.Fprintf(buf, "(%s %v)", v.Elem().Type().String(), v.Elem())
-	default: // float, complex, bool, chan, func, interface
+	case reflect.Bool:
+		fmt.Fprintf(buf, "%t", v.Bool())
+	case reflect.String:
+		fmt.Fprintf(buf, "%q", v.String())
+	case reflect.Array, reflect.Slice: // [ value ... ]
+		buf.WriteString("[ ")
+		for i := 0; i < v.Len(); i++ {
+			if err := encode(buf, v.Index(i)); err != nil {
+				return err
+			}
+
+			if i == v.Len()-1 {
+				buf.WriteByte(' ')
+			} else {
+				buf.WriteString(", ")
+			}
+		}
+		buf.WriteByte(']')
+	case reflect.Struct: // { "key": "value", ...}
+		buf.WriteString("{ ")
+		for i := 0; i < v.NumField(); i++ {
+			fmt.Fprintf(buf, "%q: ", v.Type().Field(i).Name)
+			if err := encode(buf, v.Field(i)); err != nil {
+				return err
+			}
+
+			if i == v.NumField()-1 {
+				buf.WriteByte(' ')
+			} else {
+				buf.WriteString(", ")
+			}
+		}
+		buf.WriteByte('}')
+	case reflect.Map: // { "key": "value", ...}
+		buf.WriteString("{ ")
+		for i, key := range v.MapKeys() {
+			if key.Kind() != reflect.String {
+				return fmt.Errorf("non string map key is unsupported")
+			}
+			fmt.Fprintf(buf, "%q: ", key.String())
+			if err := encode(buf, v.MapIndex(key)); err != nil {
+				return err
+			}
+
+			if i == v.Len()-1 {
+				buf.WriteByte(' ')
+			} else {
+				buf.WriteString(", ")
+			}
+		}
+		buf.WriteByte('}')
+	default:
 		return fmt.Errorf("unsupported type: %s", v.Type())
 	}
 	return nil
@@ -118,7 +76,7 @@ func encode(buf *bytes.Buffer, v reflect.Value, indent int) error {
 
 func Marshal(v interface{}) ([]byte, error) {
 	var buf bytes.Buffer
-	if err := encode(&buf, reflect.ValueOf(v), 0); err != nil {
+	if err := encode(&buf, reflect.ValueOf(v)); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
