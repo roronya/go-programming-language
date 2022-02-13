@@ -3,10 +3,16 @@ package search
 import (
 	"fmt"
 	"net/http"
+	mail2 "net/mail"
 	"reflect"
 	"strconv"
 	"strings"
 )
+
+type Param struct {
+	value reflect.Value
+	mail  bool
+}
 
 // Unpakcはreq内のHTTPリクエストパラメータから
 // ptrが指す構造体のフィールドに値を移し替えます
@@ -16,7 +22,7 @@ func Unpack(req *http.Request, ptr interface{}) error {
 	}
 
 	// 実行的な名前をキーとするフィールドのマップを構築する
-	fields := make(map[string]reflect.Value)
+	fields := make(map[string]Param)
 	v := reflect.ValueOf(ptr).Elem()
 	for i := 0; i < v.NumField(); i++ {
 		fieldInfo := v.Type().Field(i) // reflect.StructField
@@ -25,12 +31,16 @@ func Unpack(req *http.Request, ptr interface{}) error {
 		if name == "" {
 			name = strings.ToLower(fieldInfo.Name)
 		}
-		fields[name] = v.Field(i)
+		mail, err := strconv.ParseBool(tag.Get("mail"))
+		if err != nil {
+			return err
+		}
+		fields[name] = Param{v.Field(i), mail}
 	}
 
 	// リクエスト内の個々のパラメータに対する構造体のフィールドを更新
 	for name, values := range req.Form {
-		f := fields[name]
+		f := fields[name].value
 		if !f.IsValid() {
 			continue // 認識されなかったHTTPパラメータを無視
 		}
@@ -38,11 +48,21 @@ func Unpack(req *http.Request, ptr interface{}) error {
 		for _, value := range values {
 			if f.Kind() == reflect.Slice {
 				elem := reflect.New(f.Type().Elem()).Elem()
+				if fields[name].mail {
+					if err := validateMail(value); err != nil {
+						return err
+					}
+				}
 				if err := populate(elem, value); err != nil {
 					return fmt.Errorf("%s: %v", name, err)
 				}
 				f.Set(reflect.Append(f, elem))
 			} else {
+				if fields[name].mail {
+					if err := validateMail(value); err != nil {
+						return err
+					}
+				}
 				if err := populate(f, value); err != nil {
 					return fmt.Errorf("%s: %v", name, err)
 				}
@@ -75,4 +95,9 @@ func populate(v reflect.Value, value string) error {
 		return fmt.Errorf("unsupported kind %s", v.Type())
 	}
 	return nil
+}
+
+func validateMail(mail string) error {
+	_, err := mail2.ParseAddress(mail)
+	return err
 }
