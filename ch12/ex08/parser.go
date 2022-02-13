@@ -43,7 +43,7 @@ func readList(lex *lexer, v reflect.Value) {
 		}
 	case reflect.Slice: // (item ...)
 		for !endList(lex) {
-			item := reflect.New(v.Type().Elem().Elem())
+			item := reflect.New(v.Type().Elem()).Elem()
 			read(lex, item)
 			v.Set(reflect.Append(v, item))
 		}
@@ -62,9 +62,9 @@ func readList(lex *lexer, v reflect.Value) {
 		v.Set(reflect.MakeMap(v.Type()))
 		for !endList(lex) {
 			lex.consume('(')
-			key := reflect.New(v.Type().Key().Elem())
+			key := reflect.New(v.Type().Key()).Elem()
 			read(lex, key)
-			value := reflect.New(v.Type().Elem().Elem())
+			value := reflect.New(v.Type().Elem()).Elem()
 			read(lex, value)
 			v.SetMapIndex(key, value)
 			lex.consume(')')

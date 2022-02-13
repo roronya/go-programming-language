@@ -75,8 +75,8 @@ func Marshal(v interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func Unmarshal(r io.Reader, out interface{}) (err error) {
-	return NewDecoder(r).Decode(out)
+func Unmarshal(data []byte, out interface{}) (err error) {
+	return NewDecoder(bytes.NewReader(data)).Decode(out)
 }
 
 type Decoder struct {
@@ -90,6 +90,7 @@ func NewDecoder(r io.Reader) *Decoder {
 }
 
 func (dec *Decoder) Decode(v interface{}) (err error) {
+	dec.lex.next()
 	defer func() {
 		if x := recover(); x != nil {
 			err = fmt.Errorf("error at %s: %v", dec.lex.scan.Position, x)
