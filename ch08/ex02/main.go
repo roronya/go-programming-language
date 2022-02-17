@@ -10,15 +10,15 @@ import (
 	"strings"
 )
 
-func port(data string, dtpUserAddr *net.TCPAddr) {
+func port(data string) (*net.TCPAddr, error) {
 	// ex. 127,0,0,1,250,113 => 127.0.0.1:64113
 	s := strings.Split(data, ",")
-	p1, _ := strconv.Atoi(s[3])
-	p2, _ := strconv.Atoi(s[4])
-	port := p1<<8 + p2 // ポート番号は8bitずつ分けられて送られてくるので10進数に変換する
-	dtpUserAddr, _ = net.ResolveTCPAddr(
+	p1, _ := strconv.Atoi(s[4])
+	p2, _ := strconv.Atoi(s[5])
+	p := p1*256 + p2 // ポート番号は8bitずつ分けられて送られてくるので10進数に変換する
+	return net.ResolveTCPAddr(
 		"tcp",
-		fmt.Sprintf("%s.%s.%s.%s:%d", s[0], s[1], s[2], s[3], port),
+		fmt.Sprintf("%s.%s.%s.%s:%d", s[0], s[1], s[2], s[3], p),
 	)
 }
 
@@ -46,7 +46,7 @@ func handleConn(conn net.Conn) {
 			if len(arg) != 1 {
 				fmt.Fprintln(conn, "argument error")
 			}
-			port(arg[0], dtpUserAddr)
+			dtpUserAddr, _ = port(arg[0])
 			fmt.Fprintf(conn, "200 Using %s to transfer files\n", dtpUserAddr)
 		case "TYPE":
 			fmt.Fprintln(conn, "Using ascii mode to transfer files")
@@ -98,7 +98,7 @@ func handleConn(conn net.Conn) {
 }
 
 func main() {
-	ln, err := net.Listen("tcp", ":210")
+	ln, err := net.Listen("tcp", ":21")
 	if err != nil {
 		log.Fatal(err)
 	}
