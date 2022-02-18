@@ -91,6 +91,10 @@ func readList(lex *lexer, v reflect.Value) {
 			v.SetMapIndex(key, value)
 			lex.consume(')')
 		}
+	case reflect.Interface: // (Interface value)
+		// Goには文字列から型に変換するAPIがない
+		// 型名のMapを作っておく
+		// ↑のプリミティブな型以外はサポートしないという仕様にする
 	default:
 		panic(fmt.Sprintf("cannot decode list into %v", v.Type()))
 	}

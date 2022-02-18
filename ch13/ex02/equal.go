@@ -25,6 +25,7 @@ func isCyclic(v reflect.Value, seen map[comparison]bool) bool {
 			}
 		}
 		return false
+	// Map, Slice, Arrayも判定すべき
 	default:
 		return false
 	}

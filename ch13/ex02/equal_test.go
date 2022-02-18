@@ -22,6 +22,7 @@ func TestIsCyclic(t *testing.T) {
 	}
 	for _, test := range tests {
 		if got := IsCyclic(test.in); got != test.want {
+			// gotが先、wantが後
 			t.Errorf("case %#v: want %#v, got %#v", test.in, test.want, got)
 		}
 	}

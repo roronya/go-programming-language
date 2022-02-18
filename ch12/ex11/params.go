@@ -78,6 +78,7 @@ func populate(v reflect.Value, value string) error {
 }
 
 func Pack(ptr interface{}) string {
+	// reflect.ValueOf(ptr).Elem().Kind()がreflect.Structじゃないときエラーを返すべき
 	v := reflect.ValueOf(ptr).Elem()
 	builder := strings.Builder{}
 	for i := 0; i < v.NumField(); i++ {
@@ -86,7 +87,7 @@ func Pack(ptr interface{}) string {
 		if name == "" {
 			continue
 		}
-		var value string
+		var value string // url.Values{}を使ったほうがスマートに書ける
 		switch v.Field(i).Kind() {
 		case reflect.String:
 			value = v.Field(i).String()
